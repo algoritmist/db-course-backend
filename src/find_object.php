@@ -14,6 +14,9 @@ function find_object($con){
     $owner_info = $con->query("SELECT ИМЯ, ФАМИЛИЯ,МЕСТОПОЛОЖЕНИЕ FROM ЧЕЛОВЕК WHERE ИД = $owner_id")->fetch();
     $location_id = $owner_info["МЕСТОПОЛОЖЕНИЕ"];
     $coordinates = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE МЕСТОПОЛОЖЕНИЕ.ИД = $location_id")->fetch();
+    /*
+        Info about the previous owner and location of buy
+    */
     return array(
         "first_name" => $owner_info["ИМЯ"],
         "last_name" => $owner_info["ФАМИЛИЯ"],

@@ -13,8 +13,15 @@ function find_person($con){
     $id = $_POST["id"];
     $first_name = $_POST["first_name"];
     $last_name = $_POST["last_name"];
-    $result = $con->query("SELECT find_person($id, $first_name,$last_name) AS coordinates_id")->fetch();
-    return array("latitude" => $result["latitude"], "longitude" => $result["longitude"]);
+    $result = $con->query("SELECT find_person($id, $first_name,$last_name) AS journal")->fetch();
+    $jid = $result["journal"];
+    $location_id = $con->query("SELECT МЕСТО_ПРОВЕДЕНИЯ FROM ВЕДОМОСТЬ WHERE ИД = $jid")->fetch();
+    $location = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE ИД = $location_id");
+    return array(
+        "latitude" => $location["ШИРОТА"],
+        "longitude" => $location["ДОЛГОТА"],
+        "journal_id" => $jid
+    );
 }
 
 return find_person($conn);
