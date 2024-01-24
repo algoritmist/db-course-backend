@@ -23,5 +23,5 @@ function connect(string $host, string $port, string $db, string $user, string $p
 }
 
 $conn = connect($host, $port, $database, $user, $password);
-
+$GLOBALS["DB_RETURNED_NO_ROWS"] = -200;
 ?>

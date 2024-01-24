@@ -18,10 +18,22 @@ function authorize($con){
     $fname = $_POST["first_name"];
     $lname = $_POST["last_name"];
     $q = $con->query("SELECT ИМЯ, ФАМИЛИЯ FROM ЧЕЛОВЕК WHERE ИД = $id")->fetch();
-    if($fname == $q["ИМЯ"] && $lname == $q["ФАМИЛИЯ"]){
-        return true;
+    if($q == false){
+        return array(
+            "result" => "server error: try again later",
+            "error" => $GLOBALS["DB_RETURNED_NO_ROWS"]
+        );
     }
-    return false;
+    if($fname == $q["ИМЯ"] && $lname == $q["ФАМИЛИЯ"]){
+        return array(
+            "result" => "success",
+            "authorized" => true
+        );
+    }
+    return array(
+        "result" => "authorization failed",
+        "authorized" => false
+    );
 }
 
 return authorize($conn);

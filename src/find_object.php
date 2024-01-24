@@ -10,14 +10,27 @@ function find_object($con){
     $id = $_POST["id"];
     $object_name = $_POST["object_name"];
     $result = $con->query("SELECT find_object($id, $object_name) AS owner_id")->fetch();
+    if($result == false || $result < 0){
+        return array(
+            "result" => "failed to execute find_object",
+            "error"=> $result ? $result : $GLOBALS["DB_RETURNED_NO_ROWS"]
+        );
+    }
     $owner_id = $result["owner_id"];
     $owner_info = $con->query("SELECT ИМЯ, ФАМИЛИЯ,МЕСТОПОЛОЖЕНИЕ FROM ЧЕЛОВЕК WHERE ИД = $owner_id")->fetch();
+    if($owner_info == false){
+        return array(
+            "result" => "faild to find owner info",
+            "error" => "person doesn't extist"
+        );
+    }
     $location_id = $owner_info["МЕСТОПОЛОЖЕНИЕ"];
-    $coordinates = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE МЕСТОПОЛОЖЕНИЕ.ИД = $location_id")->fetch();
+    $coordinates = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE ИД = $location_id")->fetch();
     /*
         Info about the previous owner and location of buy
     */
     return array(
+        "result" => "success",
         "first_name" => $owner_info["ИМЯ"],
         "last_name" => $owner_info["ФАМИЛИЯ"],
         "latitude" => $coordinates["ШИРОТА"],
