@@ -1,43 +1,51 @@
 <?php
 require_once "Connection.php";
 function find_object($con){
-    if(!isset($_POST["id"])){
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: *');
+    $data = json_decode(filedata_contents('php://input'), true);
+    if(!isset($data["id"])){
         return "error: id required for find person request";
     }
-    if(!isset($_POST["object_name"])){
-        return "error: subject name required for find person request";
+    if(!isset($data["object_name"])){
+        return "error: object name required for find person request";
     }
-    $id = $_POST["id"];
-    $object_name = $_POST["object_name"];
-    $result = $con->query("SELECT find_object($id, $object_name) AS owner_id")->fetch();
-    if($result == false || $result < 0){
+    $id = $data["id"];
+    $object_name = $data["object_name"];
+    try{
+        $result = $con->query("SELECT find_object($id, '$object_name') AS owner_id")->fetch();
+        if($result == false || $result < 0){
+            return array(
+                "result" => "failed to execute find_object",
+                "error"=> $result ? $result : $GLOBALS["DB_RETURNED_NO_ROWS"]
+            );
+        }
+        $owner_id = $result["owner_id"];
+        $owner_info = $con->query("SELECT ИМЯ, ФАМИЛИЯ,МЕСТОПОЛОЖЕНИЕ FROM ЧЕЛОВЕК WHERE ИД = $owner_id")->fetch();
+        if($owner_info == false){
+            return array(
+                "result" => "faild to find owner info",
+                "error" => "person doesn't extist"
+            );
+        }
+        $location_id = $owner_info["МЕСТОПОЛОЖЕНИЕ"];
+        $coordinates = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE ИД = $location_id")->fetch();
+        /*
+            Info about the previous owner and location of buy
+        */
         return array(
-            "result" => "failed to execute find_object",
-            "error"=> $result ? $result : $GLOBALS["DB_RETURNED_NO_ROWS"]
+            "result" => "success",
+            "first_name" => $owner_info["ИМЯ"],
+            "last_name" => $owner_info["ФАМИЛИЯ"],
+            "latitude" => $coordinates["ШИРОТА"],
+            "longitude" => $coordinates["ДОЛГОТА"]
         );
     }
-    $owner_id = $result["owner_id"];
-    $owner_info = $con->query("SELECT ИМЯ, ФАМИЛИЯ,МЕСТОПОЛОЖЕНИЕ FROM ЧЕЛОВЕК WHERE ИД = $owner_id")->fetch();
-    if($owner_info == false){
-        return array(
-            "result" => "faild to find owner info",
-            "error" => "person doesn't extist"
-        );
+    catch(PDOException $e){
+        return "error in sql function";
     }
-    $location_id = $owner_info["МЕСТОПОЛОЖЕНИЕ"];
-    $coordinates = $con->query("SELECT ШИРОТА, ДОЛГОТА FROM МЕСТОПОЛОЖЕНИЕ WHERE ИД = $location_id")->fetch();
-    /*
-        Info about the previous owner and location of buy
-    */
-    return array(
-        "result" => "success",
-        "first_name" => $owner_info["ИМЯ"],
-        "last_name" => $owner_info["ФАМИЛИЯ"],
-        "latitude" => $coordinates["ШИРОТА"],
-        "longitude" => $coordinates["ДОЛГОТА"]
-    );
 }
 
-return find_object($conn);
+echo find_object($conn);
 
 ?>

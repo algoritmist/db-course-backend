@@ -3,19 +3,28 @@
 require_once "Connection.php";
 
 function become_warrior($con){
-    if(!isset($_POST["id"])){
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: *');
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if(!isset($data["id"])){
         return "error: id required for find person request";
     }
-    if(!isset($_POST["warrior_type"])){
+    if(!isset($data["warrior_type"])){
         return "error: warrior type required";
     }
-    $id = $_GET["id"];
-    $warrior_type = $_POST["warrior_type"];
+    $id = $data["id"];
+    $warrior_type = $data["warrior_type"];
     $who = $warrior_type == "soldier" ? "warrior" : "leader";
-    $result = $con->query("SELECT be_$who($id) as satisfied")->fetch();
-    return $result["satisfied"];
+    try{
+        $result = $con->query("SELECT be_$who($id) as satisfied")->fetch();
+        return $result["satisfied"];
+    }
+    catch(PDOException $e){
+        return "functions error!";
+    }
 }
 
-return become_warrior($conn);
+echo become_warrior($conn);
 
 ?>

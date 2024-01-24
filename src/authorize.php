@@ -5,36 +5,43 @@ function authorize($con){
     if(!$con){
         return "error: database service not available";
     }
-    if(!isset($_POST["id"])){
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: *');
+    $data = json_decode(filedata_contents('php://input'), true);
+    if(!isset($data["id"])){
         return "error: id requried";
     }
-    if(!isset($_POST["first_name"])){
+    if(!isset($data["first_name"])){
         return "error: first name required";
     }
-    if(!isset($_POST["last_name"])){
+    if(!isset($data["last_name"])){
         return "error: last name required";
     }
-    $id = $_POST["id"];
-    $fname = $_POST["first_name"];
-    $lname = $_POST["last_name"];
-    $q = $con->query("SELECT ИМЯ, ФАМИЛИЯ FROM ЧЕЛОВЕК WHERE ИД = $id")->fetch();
-    if($q == false){
+    $id = $data["id"];
+    $fname = $data["first_name"];
+    $lname = $data["last_name"];
+    try{
+        $q = $con->query("SELECT ИМЯ, ФАМИЛИЯ FROM ЧЕЛОВЕК WHERE ИД = $id")->fetch();
+        if($q == false){
+            return array(
+                "result" => "server error: try again later",
+                "error" => $GLOBALS["DB_RETURNED_NO_ROWS"]
+            );
+        }
+        if($fname == $q["ИМЯ"] && $lname == $q["ФАМИЛИЯ"]){
+            return array(
+                "result" => "success",
+                "authorized" => true
+            );
+        }
         return array(
-            "result" => "server error: try again later",
-            "error" => $GLOBALS["DB_RETURNED_NO_ROWS"]
+            "result" => "authorization failed",
+            "authorized" => false
         );
     }
-    if($fname == $q["ИМЯ"] && $lname == $q["ФАМИЛИЯ"]){
-        return array(
-            "result" => "success",
-            "authorized" => true
-        );
+    catch(PDOException $e){
+        return "sql function not working!";
     }
-    return array(
-        "result" => "authorization failed",
-        "authorized" => false
-    );
 }
-
-return authorize($conn);
+echo authorize($conn);
 ?>

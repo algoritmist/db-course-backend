@@ -1,6 +1,12 @@
 <?php
 require_once "Connection.php";
 function war($con){
+    if($con == false){
+        return "error: database service not available";
+    }
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: *');
+    $data = json_decode(file_get_contents('php://input'), true);
     if(!isset($_POST["id"])){
         return "error: id required for find person request";
     }
@@ -9,6 +15,7 @@ function war($con){
     }
     $id = $_POST["id"];
     $jid = $_POST["journal_id"];
+    try{
     if($jid < 0){
         return array(
             "result" => "failed to start war becode jid is negative",
@@ -41,7 +48,11 @@ function war($con){
         "latitude" => $coordinates["ШИРОТА"],
         "longitude" => $coordinates["ДОЛГОТА"]
     );
+    }
+    catch(PDOException $e){
+        return "sql function error!";
+    }
 }
 
-return war($conn);
+echo war($conn);
 ?>
