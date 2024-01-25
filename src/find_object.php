@@ -1,28 +1,35 @@
 <?php
 require_once "Connection.php";
-function find_object($con){
+function find_object($con)
+{
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Headers: *');
     $data = json_decode(filedata_contents('php://input'), true);
-    if(!isset($data["id"])){
-        return "error: id required for find person request";
+    if (!isset($data["id"])) {
+        return array(
+            "result" => "fail",
+            "error" => "person id required"
+        );
     }
-    if(!isset($data["object_name"])){
-        return "error: object name required for find person request";
+    if (!isset($data["object_name"])) {
+        return array(
+            "result" => "fail",
+            "error" => "object name required for find person request"
+        );
     }
     $id = $data["id"];
     $object_name = $data["object_name"];
-    try{
+    try {
         $result = $con->query("SELECT find_object($id, '$object_name') AS owner_id")->fetch();
-        if($result == false || $result < 0){
+        if ($result == false || $result < 0) {
             return array(
                 "result" => "failed to execute find_object",
-                "error"=> $result ? $result : $GLOBALS["DB_RETURNED_NO_ROWS"]
+                "error" => $result ? $result : $GLOBALS["DB_RETURNED_NO_ROWS"]
             );
         }
         $owner_id = $result["owner_id"];
         $owner_info = $con->query("SELECT ИМЯ, ФАМИЛИЯ,МЕСТОПОЛОЖЕНИЕ FROM ЧЕЛОВЕК WHERE ИД = $owner_id")->fetch();
-        if($owner_info == false){
+        if ($owner_info == false) {
             return array(
                 "result" => "faild to find owner info",
                 "error" => "person doesn't extist"
@@ -40,12 +47,13 @@ function find_object($con){
             "latitude" => $coordinates["ШИРОТА"],
             "longitude" => $coordinates["ДОЛГОТА"]
         );
-    }
-    catch(PDOException $e){
-        return "error in sql function";
+    } catch (PDOException $e) {
+        error_log($e, 0);
+        return array(
+            "result" => "failed to process query",
+            "error" => "error: server database exception"
+        );
     }
 }
 
-echo find_object($conn);
-
-?>
+echo json_encode(find_object($conn));
