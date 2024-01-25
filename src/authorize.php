@@ -4,11 +4,14 @@ require_once "Connection.php";
 function authorize($con)
 {
     if (!$con) {
-        return "error: database service not available";
+        return array(
+            "result" => "fail",
+            "error" => "database not working"
+        );
     }
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Headers: *');
-    $data = json_decode(filedata_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php:/input'), true);
     if (!isset($data["id"])) {
         return array(
             "result" => "fail",

@@ -1,6 +1,0 @@
-<pre>Array
-(
-    [result] => authorization failed
-    [authorized] => 
-)
-</pre>

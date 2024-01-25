@@ -1,1 +1,0 @@
-curl 'http://localhost:4000/src/become_warrior.php?id=0&warrior_type=soldier' > out/become_warrior.txt

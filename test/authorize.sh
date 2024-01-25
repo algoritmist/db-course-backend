@@ -1,1 +1,0 @@
-curl 'http://localhost:4000/src/authorize.php?id=0&first_name=A&last_name=B' > out/authorize.txt

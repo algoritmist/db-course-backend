@@ -4,7 +4,7 @@ function find_object($con)
 {
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Headers: *');
-    $data = json_decode(filedata_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
     if (!isset($data["id"])) {
         return array(
             "result" => "fail",
